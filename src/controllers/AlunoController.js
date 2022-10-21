@@ -1,8 +1,16 @@
 import Aluno from '../models/Aluno';
+import Foto from '../models/Foto';
 
 class AlunoController {
   async index(req, res) {
-    const alunos = await Aluno.findAll();
+    const alunos = await Aluno.findAll({
+      attributes: ["id", "nome", "sobrenome", "email", "idade", "peso", "altura"],
+      order: [['id', 'ASC'], [Foto, 'id', 'DESC']],
+      include: {
+        model: Foto,
+        attributes: ['filename'],
+      },
+    });
     res.json(alunos);
   }
 
@@ -11,15 +19,15 @@ class AlunoController {
       const aluno = await Aluno.create(req.body);
 
       return res.json(aluno);
-      } catch(e) {
-        return res.status(400).json({
-          errors: e.errors.map(err => err.message),
-        });
-      }
+    } catch(e) {
+      return res.status(400).json({
+        errors: e.erros.map(err => err.message),
+      });
+    }
   }
 
   async show(req, res) {
-    try{
+    try {
     const { id } = req.params;
 
     if(!id) {
@@ -28,18 +36,25 @@ class AlunoController {
       });
     }
 
-    const aluno = await Aluno.findByPk(id);
+    const aluno = await Aluno.findByPk(id, {
+      attributes: ["id", "nome", "sobrenome", "email", "idade", "peso", "altura"],
+      order: [['id', 'ASC'], [Foto, 'id', 'DESC']],
+      include: {
+        model: Foto,
+        attributes: ['filename'],
+      },
+    });
 
     if(!aluno) {
       return res.status(400).json({
-        errors: ['Aluno does not exist'],
+        erros: ['This aluno does not exists.'],
       });
     }
 
     return res.json(aluno);
-    } catch(e) {
+    }catch(e) {
       return res.status(400).json({
-        errors: e.errors.map(err => err.message),
+        errors: e.err.map(err => err.message),
       });
     }
   }
@@ -58,18 +73,20 @@ class AlunoController {
 
       if(!aluno) {
         return res.status(400).json({
-          errors: ['Aluno does not exist'],
+          errors: ['This aluno does not exists'],
         });
       }
+
       await aluno.destroy();
       return res.json({
         apagado: true,
       });
-      } catch(e) {
-        return res.status(400).json({
-          errors: e.errors.map(err => err.message),
-        });
-      }
+
+    } catch(e) {
+      return res.status(400).json({
+        errors: e.err.map(err => err.message),
+      });
+    }
   }
 
   async update(req, res) {
@@ -78,25 +95,25 @@ class AlunoController {
 
       if(!id) {
         return res.status(400).json({
-          errors: ['Missing ID'],
-        });
+          errors: ['ID missing'],
+        })
       }
 
       const aluno = await Aluno.findByPk(id);
 
       if(!aluno) {
-        return res.status(400).json({
-          errors: ['Aluno does not exist'],
-        });
+         return res.status(400).json({
+          errors: ['This aluno does not exists'],
+         });
       }
 
       const alunoAtualizado = await aluno.update(req.body);
       return res.json(alunoAtualizado);
-      } catch(e) {
-        return res.status(400).json({
-          errors: e.errors.map(err => err.message),
-        });
-      }
+    } catch(e) {
+      return res.status(400).json({
+        errors: e.err.map(err => err.message),
+      });
+    }
   }
 }
 

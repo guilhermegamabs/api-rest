@@ -8,7 +8,7 @@ const router = new Router();
 //router.get('/:id', userController.show); // Lista usuário
 //router.get('/', loginRequired, userController.index); // Lista usuários
 
-router.post('/', userController.store);
+router.post('/', loginRequired, userController.store);
 router.put('/', loginRequired, userController.update);
 router.delete('/', loginRequired, userController.delete);
 // normalmente chama de create ou store quando se cria algo
